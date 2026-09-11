@@ -17,6 +17,14 @@ button { cursor: pointer; }
 h1, h2 { font-family: Manrope, sans-serif; margin: 0; line-height: 1.12; }
 h1 { max-width: 680px; font-size: clamp(38px, 5vw, 64px); letter-spacing: -.045em; }
 .hero-copy { max-width: 610px; color: #b8c7d9; font-size: 18px; line-height: 1.6; }
+.quick-steps { display: flex; gap: 10px; max-width: 650px; margin: 28px 0 0; padding: 0; list-style: none; }
+.quick-steps li { display: flex; flex: 1; gap: 9px; align-items: center; color: #90a3b8; }
+.quick-steps li > span { display: grid; flex: 0 0 29px; height: 29px; place-items: center; border: 1px solid #5c7188; border-radius: 50%; font-weight: 700; }
+.quick-steps li div { display: flex; min-width: 0; flex-direction: column; }
+.quick-steps strong { color: #d1dbe6; font-size: 12px; }
+.quick-steps small { overflow: hidden; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.quick-steps li.active > span { border-color: #f8bc3b; background: #f8bc3b; color: #071d38; }
+.quick-steps li.done > span { border-color: #67d4ac; background: #d9f5e9; color: #067553; }
 .connect-card { display: flex; flex-direction: column; align-items: stretch; padding: 28px; border: 1px solid #ffffff24; border-radius: 22px; background: #102b4c; box-shadow: 0 24px 70px #0005; }
 .connect-card > div:nth-child(2) { display: flex; flex-direction: column; margin: -38px 0 22px 54px; }
 .connect-card strong { font-family: Manrope; }
@@ -24,7 +32,8 @@ h1 { max-width: 680px; font-size: clamp(38px, 5vw, 64px); letter-spacing: -.045e
 .shield { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #d9f5e9; color: #067553; font-weight: 800; }
 .primary, .export { border: 0; border-radius: 11px; background: #f8bc3b; color: #071d38; font-weight: 700; padding: 14px 18px; }
 .primary:disabled, .export:disabled { opacity: .55; cursor: wait; }
-.text-button { margin: 9px 0 0; border: 0; background: transparent; color: white; padding: 10px; }
+.demo-button { margin: 9px 0 0; border: 1px solid #ffffff52; border-radius: 11px; background: #ffffff0b; color: white; padding: 13px 18px; font-weight: 700; }
+.demo-button:hover { background: #ffffff16; }
 .connected-address, .status { margin: 8px 0 0; overflow-wrap: anywhere; text-align: center; }
 .status { color: #f4d997; font-size: 13px; }
 .workspace { max-width: 1180px; margin: -44px auto 70px; padding: 0 24px; position: relative; }
@@ -78,12 +87,17 @@ dd { margin: 3px 0 0; font-size: 12px; overflow-wrap: anywhere; }
 .empty strong { color: #20344a; margin-bottom: 6px; }
 footer { position: sticky; bottom: 0; z-index: 3; padding: 10px 24px calc(10px + env(safe-area-inset-bottom)); background: #071d38f5; color: #c5d0dc; text-align: center; font-size: 11px; backdrop-filter: blur(8px); }
 footer strong { color: white; }
+footer a { margin-left: 8px; color: #f8bc3b; font-weight: 700; }
 
 @media (max-width: 800px) {
   .topbar { height: 60px; padding: 0 18px; }
   .hero { grid-template-columns: 1fr; gap: 30px; padding: 44px 18px 78px; }
   h1 { font-size: 40px; }
   .hero-copy { font-size: 16px; }
+  .quick-steps { margin-top: 22px; }
+  .quick-steps li { gap: 6px; }
+  .quick-steps li > span { flex-basis: 25px; height: 25px; }
+  .quick-steps small { display: none; }
   .connect-card { padding: 22px; }
   .workspace { margin-top: -42px; padding: 0 12px; }
   .section-heading { padding: 20px; align-items: center; }

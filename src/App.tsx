@@ -5,6 +5,9 @@ import { connectReadOnlyWallet, loadNimiqTransactions } from './nimiq'
 import { CATEGORIES, type Category, type LedgerEntry, type ReviewStatus } from './types'
 
 const STORAGE_KEY = 'walletprep-ledger-v1'
+const SOURCE_KEY = 'walletprep-source-v1'
+const ONBOARDING_KEY = 'walletprep-onboarding-v1'
+const FEEDBACK_URL = 'https://github.com/sassypupstudios/walletprep/issues/new?labels=tester-feedback&title=WalletPrep%20tester%20feedback&body=What%20I%20tried%3A%0A%0AWhat%20happened%3A%0A%0ADevice%20and%20browser%3A%0A%0APlease%20do%20not%20include%20wallet%20addresses%2C%20transaction%20details%2C%20seed%20phrases%2C%20or%20private%20keys.'
 
 function readStoredLedger(): LedgerEntry[] | null {
   try {
@@ -29,7 +32,7 @@ function downloadCsv(entries: LedgerEntry[]) {
 
 export default function App() {
   const [entries, setEntriesState] = useState<LedgerEntry[]>(() => readStoredLedger() ?? SAMPLE_LEDGER)
-  const [source, setSource] = useState<'sample' | 'wallet'>(() => readStoredLedger() ? 'wallet' : 'sample')
+  const [source, setSource] = useState<'sample' | 'wallet'>(() => localStorage.getItem(SOURCE_KEY) === 'wallet' ? 'wallet' : 'sample')
   const [addresses, setAddresses] = useState<string[]>([])
   const [year, setYear] = useState('')
   const [from, setFrom] = useState('')
@@ -38,6 +41,9 @@ export default function App() {
   const [expanded, setExpanded] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
+  const [started, setStarted] = useState(() => localStorage.getItem(ONBOARDING_KEY) === 'complete')
+  const [reviewedThisVisit, setReviewedThisVisit] = useState(false)
+  const [exportedThisVisit, setExportedThisVisit] = useState(false)
 
   const setEntries = (next: LedgerEntry[]) => {
     setEntriesState(next)
@@ -57,7 +63,8 @@ export default function App() {
       setAddresses(connected)
       setMessage('Loading public transaction history…')
       const loaded = await loadNimiqTransactions(connected)
-      setEntries(loaded); setSource('wallet')
+      setEntries(loaded); setSource('wallet'); localStorage.setItem(SOURCE_KEY, 'wallet')
+      setStarted(true)
       setMessage(`${loaded.length} transaction${loaded.length === 1 ? '' : 's'} loaded. No signing permission was requested.`)
     } catch (error) {
       setMessage(error instanceof Error ? error.message : String(error))
@@ -66,10 +73,18 @@ export default function App() {
 
   function updateEntry(id: string, patch: Partial<LedgerEntry>) {
     setEntries(entries.map((entry) => entry.id === id ? { ...entry, ...patch } : entry))
+    if (patch.reviewStatus === 'reviewed' || patch.category || patch.notes !== undefined) setReviewedThisVisit(true)
   }
 
   function loadSample() {
-    setEntries(SAMPLE_LEDGER); setSource('sample'); setAddresses([]); setMessage('Sample ledger loaded.')
+    setEntries(SAMPLE_LEDGER); setSource('sample'); localStorage.setItem(SOURCE_KEY, 'sample'); setAddresses([]); setStarted(true); setMessage('Safe sample ledger loaded — no wallet connected.')
+    window.setTimeout(() => document.querySelector('#ledger')?.scrollIntoView({ behavior: 'smooth' }), 50)
+  }
+
+  function exportLedger() {
+    downloadCsv(visible)
+    setExportedThisVisit(true)
+    localStorage.setItem(ONBOARDING_KEY, 'complete')
   }
 
   return <div className="app-shell">
@@ -83,22 +98,27 @@ export default function App() {
         <div>
           <p className="eyebrow">Nimiq record organizer</p>
           <h1>Turn wallet activity into a ledger you can review.</h1>
-          <p className="hero-copy">Connect read-only, classify transactions, add context, and export clean records for your bookkeeping workflow.</p>
+          <p className="hero-copy">Connect read-only or try the safe demo, review unknown items, and export clean records for your bookkeeping workflow.</p>
+          <ol className="quick-steps" aria-label="Three-step WalletPrep workflow">
+            <li className={started ? 'done' : 'active'}><span>1</span><div><strong>Choose data</strong><small>Read a wallet or use the demo</small></div></li>
+            <li className={reviewedThisVisit ? 'done' : started ? 'active' : ''}><span>2</span><div><strong>Review</strong><small>Classify unknown items</small></div></li>
+            <li className={exportedThisVisit ? 'done' : reviewedThisVisit ? 'active' : ''}><span>3</span><div><strong>Export</strong><small>Download your CSV</small></div></li>
+          </ol>
         </div>
         <div className="connect-card">
           <div className="shield">✓</div>
-          <div><strong>Read-only by design</strong><small>WalletPrep only requests your public address. It cannot sign or move funds.</small></div>
+          <div><strong>Read-only by design</strong><small>Seed phrases and private keys are never requested. WalletPrep cannot sign or move funds.</small></div>
           <button className="primary" onClick={connect} disabled={busy}>{busy ? 'Connecting…' : 'Connect Nimiq Pay'}</button>
-          <button className="text-button" onClick={loadSample}>Explore with sample data</button>
+          <button className="demo-button" onClick={loadSample}>Try the safe demo — no wallet needed</button>
           {addresses.length > 0 && <small className="connected-address">{addresses.length} account{addresses.length > 1 ? 's' : ''}: {shortAddress(addresses[0])}</small>}
           {message && <p className="status" role="status">{message}</p>}
         </div>
       </section>
 
-      <section className="workspace" aria-label="Ledger workspace">
+      <section className="workspace" id="ledger" aria-label="Ledger workspace">
         <div className="section-heading">
           <div><p className="eyebrow">Your records</p><h2>Transaction ledger</h2></div>
-          <button className="export" onClick={() => downloadCsv(visible)} disabled={visible.length === 0}>↓ Export {visible.length} to CSV</button>
+          <button className="export" onClick={exportLedger} disabled={visible.length === 0}>↓ Export {visible.length} to CSV</button>
         </div>
 
         <div className="summary-grid">
@@ -142,6 +162,6 @@ export default function App() {
       </section>
     </main>
 
-    <footer><strong>WalletPrep organizes transaction records.</strong> It does not calculate taxes, determine tax liability, or provide tax, legal, or accounting advice.</footer>
+    <footer><strong>Read-only: never share a seed phrase or private key.</strong> WalletPrep only organizes records and does not provide tax, legal, or accounting advice. <a href={FEEDBACK_URL} target="_blank" rel="noreferrer">Send feedback</a></footer>
   </div>
 }

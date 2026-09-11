@@ -2,6 +2,8 @@
 
 WalletPrep is a mobile-first Nimiq Mini App for turning public wallet activity into a reviewable transaction ledger. Connect Nimiq Pay with read-only account access, or use the included sample data, then filter, annotate, classify, review, and export records as CSV.
 
+**Value proposition:** Turn Nimiq wallet history into an organized, reviewable CSV in about one minute—without sharing keys or moving funds.
+
 > **WalletPrep organizes transaction records. It does not calculate taxes, determine tax liability, or provide tax, legal, or accounting advice.** Categories are organizational labels only. Ambiguous records remain in **Needs Review** until a user decides how to describe them.
 
 ## What works
@@ -50,6 +52,22 @@ These steps follow the current [official local Mini App guide](https://nimiq.dev
 
 If the provider is unavailable, the app reports the error without falling back to broader wallet permissions. **Explore with sample data** remains available.
 
+### One-minute tester route
+
+1. Open the HTTPS test URL in Nimiq Pay, or in any current mobile browser for demo mode.
+2. Tap **Try the safe demo — no wallet needed**. No wallet or funds are involved.
+3. Tap **Open queue →**, open one item, choose a category, and set it to **Reviewed**.
+4. Tap **Export to CSV** and confirm the file downloads.
+5. Tap **Send feedback** in the footer. Do not include wallet addresses, transaction details, seed phrases, or private keys in the report.
+
+Tester screenshots: placeholders pending the first hosted phone build.
+
+- `[Screenshot placeholder: first-run data choice on a phone]`
+- `[Screenshot placeholder: Needs Review item expanded on a phone]`
+- `[Screenshot placeholder: CSV export confirmation/download]`
+
+**Tester call-to-action:** Help us reach 30 wallet testers before the competition deadline—try the one-minute route, then share only usability or bug feedback (never wallet-sensitive data).
+
 ### Testnet notes
 
 The official Nimiq Pay guide documents a hidden development menu: long-press the settings button for 10 seconds, then select **Testnet**. Network switching clears Nimiq Pay's transaction history and reloads the app. WalletPrep's default open RPC endpoint is a mainnet prototyping endpoint, so live testnet history requires a testnet history RPC endpoint configured in `src/nimiq.ts`; sample-data mode can be used to test the complete ledger UX without funds.
@@ -76,6 +94,12 @@ An EVM adapter can later map EIP-1193/public RPC records into the same `LedgerEn
 - Only public addresses and public blockchain data are handled.
 - Do not enter wallet recovery material anywhere in this app or repository.
 - Categories are bookkeeping labels, not conclusions about tax treatment.
+
+## Usage measurement
+
+WalletPrep includes no app analytics, cookies, telemetry backend, or tracking pixels. In particular, it does not send wallet addresses or transaction contents to an analytics service. Competition adoption should be verified using Nimiq's own Mini App usage measurement. The launch target is 30 wallet testers, providing a buffer above the stated 20+ usage threshold.
+
+Community-ready launch copy, tester instructions, and bug-report guidance are in [`docs/adoption-launch-kit.md`](docs/adoption-launch-kit.md).
 
 ## License
 
